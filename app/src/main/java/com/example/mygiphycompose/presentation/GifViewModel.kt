@@ -9,6 +9,9 @@ import com.example.mygiphycompose.utils.Constants.Companion.PAGE_SIZE
 import com.example.mygiphycompose.utils.NetworkConnection
 import com.example.mygiphycompose.utils.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -30,25 +33,56 @@ class GifViewModel @Inject constructor(
     private var isSearchingStarting = true
     var isSearching = mutableStateOf(false)
     private var offset = 0
+    private var currentQuery = ""
+    val queryFlow = MutableSharedFlow<String>(0, 0)
+
 
     init {
-        loadGifs()
+        internalRequest("")
+        viewModelScope.launch {
+            queryFlow.asSharedFlow().debounce(400)
+                .collect {
+                    searchQuery(it)
+                }
+        }
+
+    }
+
+    private fun searchQuery(it: String) {
+        offset = 0
+        canLoadMore.value = true
+        isSearching.value = false
+        isSearchingStarting = true
+        gifsList.value = emptyList()
+        currentQuery = it
+        internalRequest(it)
     }
 
     fun fetchMore() {
         if (!isLoading.value && offset != -1) {
-            loadGifs()
+            internalRequest(currentQuery)
         }
     }
 
-    private fun loadGifs() {
+    fun emitQuery(query: String) {
+        viewModelScope.launch {
+            queryFlow.emit(query)
+        }
+    }
+
+
+    private fun internalRequest(query: String) {
 
         viewModelScope.launch {
             try {
                 isLoading.value = true
 
                 val response = if (hasInternet) {
-                    repository.getTrendingGifs(PAGE_SIZE, offset)
+                    if (query.isNotEmpty()) {
+                        repository.getSearchingGifs(query, PAGE_SIZE, offset)
+                    } else {
+                        repository.getTrendingGifs(PAGE_SIZE, offset)
+                    }
                 } else {
                     null
                 }
@@ -57,71 +91,6 @@ class GifViewModel @Inject constructor(
                     when (response) {
                         is Resource.Success -> {
                             if (response.data != null) {
-
-                                if (response.data.size == PAGE_SIZE) {
-                                    canLoadMore.value = true
-                                    offset += PAGE_SIZE
-                                } else {
-                                    canLoadMore.value = false
-                                    offset = -1
-                                }
-                                gifsList.value += response.data
-                            }
-                        }
-
-                        is Resource.Error -> {
-                            loadError.value = response.error.toString()
-                            isLoading.value = false
-                        }
-
-                        is Resource.Loading -> {}
-                        is Resource.Empty -> {}
-                    }
-                } else {
-                    val cachedList = repository.getCachedGifs().data
-                    offset = -1
-                    if (cachedList != null) {
-                        gifsList.value += cachedList
-                    }
-                }
-
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-
-            isLoading.value = false
-        }
-    }
-
-    fun searchQuery(query: String) {
-        val listSearch = if (isSearchingStarting) {
-            gifsList.value
-        } else {
-            cachedGifsList
-        }
-
-        viewModelScope.launch {
-            try {
-                if (query.isEmpty()){
-                    gifsList.value = cachedGifsList
-                    isSearching.value = false
-                    isSearchingStarting = true
-                    offset = 0
-                    return@launch
-                }
-                isLoading.value = true
-
-                val response = if (hasInternet) {
-                    repository.getSearchingGifs(query, PAGE_SIZE, offset)
-                } else {
-                    null
-                }
-
-                if (response != null) {
-                    when (response) {
-                        is Resource.Success -> {
-                            if (response.data != null) {
-
                                 if (response.data.size == PAGE_SIZE) {
                                     canLoadMore.value = true
                                     offset += PAGE_SIZE
@@ -130,13 +99,12 @@ class GifViewModel @Inject constructor(
                                     offset = -1
                                 }
 
-                                if (isSearchingStarting){
+                                if (isSearchingStarting) {
                                     cachedGifsList = gifsList.value
                                     isSearchingStarting = false
                                 }
-                                gifsList.value = response.data
+                                gifsList.value += response.data
                                 isSearching.value = true
-
                             }
                         }
 

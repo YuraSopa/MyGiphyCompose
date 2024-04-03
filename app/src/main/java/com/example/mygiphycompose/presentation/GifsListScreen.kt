@@ -61,8 +61,8 @@ fun GifsListScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(8.dp)
-            ){
-                viewModel.searchQuery(it)
+            ) {
+                viewModel.emitQuery(it)
             }
 
             LazyVerticalStaggeredGrid(
@@ -124,7 +124,7 @@ fun SearchBar(
         BasicTextField(
             value = text,
             onValueChange = {
-                text = it
+                text = it.trim()
                 onSearch(text)
             },
             maxLines = 1,
