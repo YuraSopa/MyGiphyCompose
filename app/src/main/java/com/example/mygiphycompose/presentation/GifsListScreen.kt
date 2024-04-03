@@ -61,7 +61,9 @@ fun GifsListScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(8.dp)
-            )
+            ){
+                viewModel.searchQuery(it)
+            }
 
             LazyVerticalStaggeredGrid(
                 columns = StaggeredGridCells.Fixed(2),

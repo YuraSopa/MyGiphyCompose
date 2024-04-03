@@ -40,7 +40,23 @@ class GifRepositoryImpl @Inject constructor(
         limit: Int,
         offset: Int
     ): Resource<List<Gif>> {
-        TODO("Not yet implemented")
+
+        val response = api.getSearchGifs(API_KEY, query, limit, offset)
+
+        if (response.isSuccessful) {
+            val gifData = response.body()!!
+            if (offset == 0) db.dao.clearAll()
+
+            db.dao.upsertAllGifs(
+                gifData.toGifEntity()
+            )
+
+            return Resource.Success(
+                gifData.toGifEntity().map {
+                    it.toGif()
+                })
+        }
+        return Resource.Error(response.message())
     }
 
     override suspend fun getCachedGifs(): Resource<List<Gif>> {

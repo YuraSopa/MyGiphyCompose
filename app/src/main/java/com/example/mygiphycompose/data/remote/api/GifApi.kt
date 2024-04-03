@@ -30,7 +30,7 @@ interface GifApi {
         limit: Int,
         @Query("offset")
         offset: Int
-    )
+    ): Response<GifsResponse>
 
     companion object {
         const val BASE_URL = "https://api.giphy.com/v1/gifs/"
