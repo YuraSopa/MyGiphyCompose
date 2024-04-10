@@ -21,7 +21,7 @@ class GifRepositoryImpl @Inject constructor(
         if (response.isSuccessful) {
             val gifData = response.body()!!
 
-            if (offset == 0) db.dao.clearAll()
+            //if (offset == 0) db.dao.clearAll()
 
             db.dao.upsertAllGifs(
                 gifData.toGifEntity()
@@ -45,7 +45,6 @@ class GifRepositoryImpl @Inject constructor(
 
         if (response.isSuccessful) {
             val gifData = response.body()!!
-            if (offset == 0) db.dao.clearAll()
 
             db.dao.upsertAllGifs(
                 gifData.toGifEntity()
@@ -65,4 +64,6 @@ class GifRepositoryImpl @Inject constructor(
         }
         return Resource.Success(list)
     }
+
+    suspend fun clearCachedGifs() = db.dao.clearAll()
 }

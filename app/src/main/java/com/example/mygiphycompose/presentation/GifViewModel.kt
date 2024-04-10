@@ -9,12 +9,14 @@ import com.example.mygiphycompose.utils.Constants.Companion.PAGE_SIZE
 import com.example.mygiphycompose.utils.NetworkConnection
 import com.example.mygiphycompose.utils.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@FlowPreview
 @HiltViewModel
 class GifViewModel @Inject constructor(
     private val repository: GifRepositoryImpl,
@@ -40,6 +42,10 @@ class GifViewModel @Inject constructor(
     init {
         internalRequest("")
         viewModelScope.launch {
+            if (hasInternet){
+                repository.clearCachedGifs()
+            }
+
             queryFlow.asSharedFlow().debounce(400)
                 .collect {
                     searchQuery(it)
@@ -78,6 +84,7 @@ class GifViewModel @Inject constructor(
                 isLoading.value = true
 
                 val response = if (hasInternet) {
+
                     if (query.isNotEmpty()) {
                         repository.getSearchingGifs(query, PAGE_SIZE, offset)
                     } else {
@@ -120,7 +127,20 @@ class GifViewModel @Inject constructor(
                     val cachedList = repository.getCachedGifs().data
                     offset = -1
                     if (cachedList != null) {
-                        gifsList.value += cachedList
+                        if (query.isEmpty()) {
+                            gifsList.value = cachedList
+                            return@launch
+                        } else {
+                            val result = cachedList.filter {
+                                it.title.contains(query.trim(), ignoreCase = true)
+                            }
+                            if (isSearchingStarting) {
+                                cachedGifsList = gifsList.value
+                                isSearchingStarting = true
+                            }
+                            gifsList.value = result
+                            isSearching.value = true
+                        }
                     }
                 }
 
