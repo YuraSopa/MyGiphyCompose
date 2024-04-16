@@ -1,6 +1,7 @@
 package com.example.mygiphycompose
 
 import android.app.Application
+import android.graphics.Bitmap
 import coil.ImageLoader
 import coil.ImageLoaderFactory
 import coil.disk.DiskCache
@@ -27,11 +28,13 @@ class BaseApplication : Application(), ImageLoaderFactory {
                     .strongReferencesEnabled(true)
                     .build()
             }
+            .bitmapConfig(Bitmap.Config.RGB_565)
+            .allowHardware(false)
             .diskCachePolicy(CachePolicy.ENABLED)
             .diskCache {
                 DiskCache.Builder()
-                    .directory(cacheDir)
-                    .maxSizePercent(0.03)
+                    .directory(cacheDir.resolve("gifs_cache"))
+                    .maxSizePercent(0.20)
                     .build()
             }
             .logger(DebugLogger())

@@ -1,14 +1,18 @@
 package com.example.mygiphycompose.presentation
 
+import android.content.Context
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import coil.annotation.ExperimentalCoilApi
+import coil.imageLoader
 import com.example.mygiphycompose.data.repositoryImpl.GifRepositoryImpl
 import com.example.mygiphycompose.domain.Gif
 import com.example.mygiphycompose.utils.Constants.Companion.PAGE_SIZE
 import com.example.mygiphycompose.utils.NetworkConnection
 import com.example.mygiphycompose.utils.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -20,7 +24,8 @@ import javax.inject.Inject
 @HiltViewModel
 class GifViewModel @Inject constructor(
     private val repository: GifRepositoryImpl,
-    private val networkConnection: NetworkConnection
+    private val networkConnection: NetworkConnection,
+    @ApplicationContext val applicationContext: Context
 ) : ViewModel() {
 
     private val hasInternet: Boolean
@@ -42,11 +47,11 @@ class GifViewModel @Inject constructor(
     init {
         internalRequest("")
         viewModelScope.launch {
-            if (hasInternet){
+            if (hasInternet) {
                 repository.clearCachedGifs()
             }
 
-            queryFlow.asSharedFlow().debounce(400)
+            queryFlow.asSharedFlow().debounce(500)
                 .collect {
                     searchQuery(it)
                 }
@@ -77,6 +82,7 @@ class GifViewModel @Inject constructor(
     }
 
 
+    @OptIn(ExperimentalCoilApi::class)
     private fun internalRequest(query: String) {
 
         viewModelScope.launch {
@@ -124,7 +130,18 @@ class GifViewModel @Inject constructor(
                         is Resource.Empty -> {}
                     }
                 } else {
-                    val cachedList = repository.getCachedGifs().data
+
+                    val cachedList = repository.getCachedGifs().data?.filter { gif ->
+                        try {
+                            applicationContext.imageLoader.diskCache?.openSnapshot(gif.image)
+                                ?.use {
+                                    it.data.toFile().exists()
+                                } ?: false
+                        } catch (t: Throwable) {
+                            false
+                        }
+                    }
+
                     offset = -1
                     if (cachedList != null) {
                         if (query.isEmpty()) {
