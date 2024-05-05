@@ -1,5 +1,9 @@
 package com.example.mygiphycompose.domain
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+@Parcelize
 data class Gif(
     val embedUrl: String,
     val id: String,
@@ -9,4 +13,4 @@ data class Gif(
     val rating: String,
     val title: String,
     val url: String
-)
+): Parcelable

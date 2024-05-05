@@ -1,6 +1,5 @@
 package com.example.mygiphycompose.presentation
 
-import android.os.Build
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -37,11 +36,10 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
-import coil.decode.GifDecoder
-import coil.decode.ImageDecoderDecoder
 import coil.request.ImageRequest
 import com.example.mygiphycompose.R
 import com.example.mygiphycompose.domain.Gif
+import com.example.mygiphycompose.utils.Constants.Companion.decoder
 import timber.log.Timber
 
 data class DropDownItem(
@@ -53,7 +51,7 @@ data class DropDownItem(
 fun GifItem(
     gif: Gif,
     modifier: Modifier = Modifier,
-    onItemClick: (DropDownItem) -> Unit
+    onItemMenuClick: (DropDownItem) -> Unit
 ) {
     val itemHeight = rememberSaveable { gif.imageHeight }
     var isContextMenuVisible by rememberSaveable {
@@ -95,13 +93,6 @@ fun GifItem(
             }
     ) {
 
-        val decoder =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                ImageDecoderDecoder.Factory()
-            } else {
-                GifDecoder.Factory()
-            }
-
         Box(
             modifier = modifier
                 .fillMaxSize()
@@ -123,7 +114,7 @@ fun GifItem(
                             .align(Alignment.Center)
                     )
                 },
-                contentScale = ContentScale.Crop
+                contentScale = ContentScale.FillHeight
             )
         }
 
@@ -146,7 +137,7 @@ fun GifItem(
                         }
                     },
                     onClick = {
-                        onItemClick(item)
+                        onItemMenuClick(item)
                         isContextMenuVisible = false
                     }
                 )

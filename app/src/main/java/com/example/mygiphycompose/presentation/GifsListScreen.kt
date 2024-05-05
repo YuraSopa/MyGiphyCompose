@@ -1,6 +1,7 @@
 package com.example.mygiphycompose.presentation
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,13 +35,17 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.example.mygiphycompose.domain.Gif
 import com.example.mygiphycompose.utils.shouldLoadMore
+import kotlinx.coroutines.FlowPreview
 import timber.log.Timber
 
+@OptIn(FlowPreview::class)
 @Composable
 fun GifsListScreen(
     gifs: List<Gif>,
+    navController: NavController,
     viewModel: GifViewModel = hiltViewModel(),
     paginationCallback: () -> Unit
 ) {
@@ -77,8 +82,11 @@ fun GifsListScreen(
                         val gif = gifs[index]
                         GifItem(
                             gif = gif,
-                            modifier = Modifier,
-                            onItemClick = {
+                            modifier = Modifier.clickable {
+                                navController.navigate("gif_full_screen/${gif.id}")
+                            },
+
+                            onItemMenuClick = {
                                 Timber.d("Clicked on ${gif.title}")
                             }
                         )
