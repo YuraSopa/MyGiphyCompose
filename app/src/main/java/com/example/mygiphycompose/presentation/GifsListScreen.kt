@@ -35,7 +35,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.example.mygiphycompose.domain.Gif
 import com.example.mygiphycompose.utils.shouldLoadMore
 import kotlinx.coroutines.FlowPreview
 import timber.log.Timber
@@ -43,11 +42,11 @@ import timber.log.Timber
 @OptIn(FlowPreview::class)
 @Composable
 fun GifsListScreen(
-    gifs: List<Gif>,
     navController: NavController,
     viewModel: GifViewModel = hiltViewModel(),
     paginationCallback: () -> Unit
 ) {
+    val gifs by remember { viewModel.gifsList }
     val isLoading by remember { viewModel.isLoading }
     val canLoadMore by remember { viewModel.canLoadMore }
 

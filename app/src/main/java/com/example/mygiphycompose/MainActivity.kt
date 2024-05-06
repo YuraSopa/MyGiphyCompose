@@ -35,7 +35,6 @@ class MainActivity : ComponentActivity() {
                 ) {
                     composable("gif_list_screen") {
                         GifsListScreen(
-                            gifs = gifs,
                             navController = navController,
                             paginationCallback = {
                                 viewModel.fetchMore()
@@ -54,10 +53,7 @@ class MainActivity : ComponentActivity() {
                         val index = gifs.indexOfFirst {
                             it.id == id
                         }
-                        GifFullScreen(
-                            gifs = gifs,
-                            initialIndex = index
-                        )
+                        GifFullScreen(initialIndex = index)
                     }
                 }
             }

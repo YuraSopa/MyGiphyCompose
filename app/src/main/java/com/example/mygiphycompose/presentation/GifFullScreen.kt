@@ -7,18 +7,21 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.example.mygiphycompose.domain.Gif
+import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.FlowPreview
 import timber.log.Timber
 
 @OptIn(ExperimentalFoundationApi::class, FlowPreview::class)
 @Composable
 fun GifFullScreen(
-    gifs: List<Gif>,
+    viewModel: GifViewModel = hiltViewModel(),
     initialIndex: Int
 ) {
+    val gifs by remember { viewModel.gifsList }
     val pagerState = rememberPagerState(
         initialPage = initialIndex,
         pageCount = {
