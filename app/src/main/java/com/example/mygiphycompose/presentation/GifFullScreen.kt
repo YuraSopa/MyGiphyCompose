@@ -39,6 +39,7 @@ fun GifFullScreen(
             GifItem(
                 gif = gifs[index],
                 modifier = Modifier.fillMaxSize(),
+                imageHeightMultiplier = 2,
                 onItemMenuClick = {
                     Timber.d("Clicked on FULL SCREEN ${gifs[index].title}")
                 }

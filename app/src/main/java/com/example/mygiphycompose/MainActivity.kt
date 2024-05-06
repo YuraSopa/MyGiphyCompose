@@ -27,6 +27,7 @@ class MainActivity : ComponentActivity() {
             MyGiphyComposeTheme {
                 val viewModel = hiltViewModel<GifViewModel>()
                 val gifs by remember { viewModel.gifsList }
+
                 val navController = rememberNavController()
                 NavHost(
                     navController = navController,

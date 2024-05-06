@@ -6,7 +6,6 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -51,7 +50,9 @@ data class DropDownItem(
 fun GifItem(
     gif: Gif,
     modifier: Modifier = Modifier,
-    onItemMenuClick: (DropDownItem) -> Unit
+    imageHeightMultiplier: Int = 1, //TODO:Try another lib Glide or Picasso
+    onItemMenuClick: (DropDownItem) -> Unit,
+    onClick: () -> Unit = {}
 ) {
     val itemHeight = rememberSaveable { gif.imageHeight }
     var isContextMenuVisible by rememberSaveable {
@@ -73,7 +74,7 @@ fun GifItem(
     Card(
         elevation = CardDefaults.cardElevation(4.dp),
         modifier = Modifier
-            .height(itemHeight.toInt().dp)
+            .height(itemHeight.toInt().dp * imageHeightMultiplier)
             .indication(interactionSource, LocalIndication.current)
             .pointerInput(true) {
                 detectTapGestures(
@@ -87,16 +88,14 @@ fun GifItem(
                         interactionSource.emit(press)
                         tryAwaitRelease()
                         interactionSource.emit(PressInteraction.Release(press))
+                    },
+                    onTap = {
+                        onClick()
                     }
                 )
 
             }
     ) {
-
-        Box(
-            modifier = modifier
-                .fillMaxSize()
-        ) {
             SubcomposeAsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
                     .data(gif.image)
@@ -116,7 +115,6 @@ fun GifItem(
                 },
                 contentScale = ContentScale.FillHeight
             )
-        }
 
 
         DropdownMenu(

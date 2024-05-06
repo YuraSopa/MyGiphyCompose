@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @FlowPreview
@@ -33,15 +34,15 @@ class GifViewModel @Inject constructor(
 
     var gifsList = mutableStateOf<List<Gif>>(listOf())
     var isLoading = mutableStateOf(false)
-    var loadError = mutableStateOf("")
+    private var loadError = mutableStateOf("")
     val canLoadMore = mutableStateOf(false)
 
     private var cachedGifsList = listOf<Gif>()
     private var isSearchingStarting = true
-    var isSearching = mutableStateOf(false)
+    private var isSearching = mutableStateOf(false)
     private var offset = 0
     private var currentQuery = ""
-    val queryFlow = MutableSharedFlow<String>(0, 0)
+    private val queryFlow = MutableSharedFlow<String>(0, 0)
 
 
     init {
@@ -117,6 +118,7 @@ class GifViewModel @Inject constructor(
                                     isSearchingStarting = false
                                 }
                                 gifsList.value += response.data
+                                Timber.d("List: ${gifsList.value}")
                                 isSearching.value = true
                             }
                         }

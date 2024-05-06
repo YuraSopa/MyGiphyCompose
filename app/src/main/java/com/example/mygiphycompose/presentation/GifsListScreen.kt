@@ -1,7 +1,6 @@
 package com.example.mygiphycompose.presentation
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -82,10 +81,9 @@ fun GifsListScreen(
                         val gif = gifs[index]
                         GifItem(
                             gif = gif,
-                            modifier = Modifier.clickable {
+                            onClick = {
                                 navController.navigate("gif_full_screen/${gif.id}")
                             },
-
                             onItemMenuClick = {
                                 Timber.d("Clicked on ${gif.title}")
                             }
