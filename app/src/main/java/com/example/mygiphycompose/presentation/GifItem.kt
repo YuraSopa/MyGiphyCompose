@@ -96,25 +96,31 @@ fun GifItem(
 
             }
     ) {
-            SubcomposeAsyncImage(
-                model = ImageRequest.Builder(LocalContext.current)
-                    .data(gif.image)
-                    .decoderFactory(decoder)
-                    .build(),
-                contentDescription = null,
-                modifier = modifier
-                    .fillMaxSize()
-                    .clip(RoundedCornerShape(6.dp)),
-                loading = {
-                    CircularProgressIndicator(
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier
-                            .scale(0.2f)
-                            .align(Alignment.Center)
-                    )
-                },
-                contentScale = ContentScale.FillHeight
-            )
+        val scaleGif = if (imageHeightMultiplier == 1) {
+            ContentScale.Crop
+        } else {
+            ContentScale.FillHeight
+        }
+
+        SubcomposeAsyncImage(
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(gif.image)
+                .decoderFactory(decoder)
+                .build(),
+            contentDescription = null,
+            modifier = modifier
+                .fillMaxSize()
+                .clip(RoundedCornerShape(6.dp)),
+            loading = {
+                CircularProgressIndicator(
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier
+                        .scale(0.2f)
+                        .align(Alignment.Center)
+                )
+            },
+            contentScale = scaleGif
+        )
 
 
         DropdownMenu(

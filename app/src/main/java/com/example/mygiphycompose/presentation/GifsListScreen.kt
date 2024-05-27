@@ -23,6 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
@@ -46,8 +47,7 @@ fun GifsListScreen(
     viewModel: GifViewModel = hiltViewModel(),
     paginationCallback: () -> Unit
 ) {
-    val gifs by remember { viewModel.gifsList }
-    val isLoading by remember { viewModel.isLoading }
+    val gifs = viewModel.gifsList.value
     val canLoadMore by remember { viewModel.canLoadMore }
 
     val scrollState = rememberLazyStaggeredGridState()
@@ -76,6 +76,7 @@ fun GifsListScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 contentPadding = PaddingValues(vertical = 4.dp),
                 content = {
+                    Timber.d("LIST size from Composable: ${gifs.size}")
                     items(gifs.size) { index ->
                         val gif = gifs[index]
                         GifItem(
@@ -118,7 +119,7 @@ fun SearchBar(
     hint: String = "",
     onSearch: (String) -> Unit = {}
 ) {
-    var text by remember {
+    var text by rememberSaveable {
         mutableStateOf("")
     }
     var isHintDisplayed by remember {

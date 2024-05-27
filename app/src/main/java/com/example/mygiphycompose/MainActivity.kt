@@ -35,6 +35,7 @@ class MainActivity : ComponentActivity() {
                 ) {
                     composable("gif_list_screen") {
                         GifsListScreen(
+                            viewModel = viewModel,
                             navController = navController,
                             paginationCallback = {
                                 viewModel.fetchMore()
