@@ -9,13 +9,10 @@ import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -23,22 +20,18 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import coil.compose.SubcomposeAsyncImage
-import coil.request.ImageRequest
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.mygiphycompose.R
 import com.example.mygiphycompose.domain.Gif
-import com.example.mygiphycompose.utils.Constants.Companion.decoder
 import timber.log.Timber
 
 data class DropDownItem(
@@ -46,6 +39,7 @@ data class DropDownItem(
     val text: String
 )
 
+@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun GifItem(
     gif: Gif,
@@ -96,31 +90,16 @@ fun GifItem(
 
             }
     ) {
-        val scaleGif = if (imageHeightMultiplier == 1) {
-            ContentScale.Crop
-        } else {
-            ContentScale.FillHeight
-        }
 
-        SubcomposeAsyncImage(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data(gif.image)
-                .decoderFactory(decoder)
-                .build(),
-            contentDescription = null,
+        GlideImage(
+            model = gif.image,
+            contentDescription = "gif #${gif.id}",
             modifier = modifier
-                .fillMaxSize()
-                .clip(RoundedCornerShape(6.dp)),
-            loading = {
-                CircularProgressIndicator(
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier
-                        .scale(0.2f)
-                        .align(Alignment.Center)
-                )
-            },
-            contentScale = scaleGif
-        )
+                .fillMaxSize(),
+            contentScale = ContentScale.FillBounds
+        ){
+            it.diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+        }
 
 
         DropdownMenu(

@@ -112,6 +112,10 @@ dependencies {
     implementation ("io.coil-kt:coil-gif:2.5.0")
     implementation ("io.coil-kt:coil-svg:2.5.0")
 
+    //Glide
+//    implementation("com.github.skydoves:landscapist-glide:1.3.7")
+ implementation ("com.github.bumptech.glide:compose:1.0.0-beta01")
+
     //Dagger
     implementation("com.google.dagger:hilt-android:2.48")
     implementation ("androidx.hilt:hilt-navigation-compose:1.1.0")

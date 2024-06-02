@@ -54,7 +54,7 @@ class MainActivity : ComponentActivity() {
                         val index = gifs.indexOfFirst {
                             it.id == id
                         }
-                        GifFullScreen(initialIndex = index)
+                        GifFullScreen(viewModel= viewModel, initialIndex = index)
                     }
                 }
             }

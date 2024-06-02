@@ -4,8 +4,9 @@ import android.content.Context
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import coil.annotation.ExperimentalCoilApi
-import coil.imageLoader
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.cache.DiskLruCacheWrapper
+import com.bumptech.glide.signature.ObjectKey
 import com.example.mygiphycompose.data.repositoryImpl.GifRepositoryImpl
 import com.example.mygiphycompose.domain.Gif
 import com.example.mygiphycompose.utils.Constants.Companion.PAGE_SIZE
@@ -33,7 +34,7 @@ class GifViewModel @Inject constructor(
         get() = networkConnection.isOnline()
 
     var gifsList = mutableStateOf<List<Gif>>(listOf())
-    var isLoading = mutableStateOf(false)
+    private var isLoading = mutableStateOf(false)
     private var loadError = mutableStateOf("")
     val canLoadMore = mutableStateOf(false)
 
@@ -83,7 +84,6 @@ class GifViewModel @Inject constructor(
     }
 
 
-    @OptIn(ExperimentalCoilApi::class)
     private fun internalRequest(query: String) {
 
         viewModelScope.launch {
@@ -133,15 +133,11 @@ class GifViewModel @Inject constructor(
                     }
                 } else {
 
-                    val cachedList = repository.getCachedGifs().data?.filter { gif ->
-                        try {
-                            applicationContext.imageLoader.diskCache?.openSnapshot(gif.image)
-                                ?.use {
-                                    it.data.toFile().exists()
-                                } ?: false
-                        } catch (t: Throwable) {
-                            false
-                        }
+                    val cachedList = repository.getCachedGifs().data?.let {
+                        getCachedGifUrls(
+                            applicationContext,
+                            it
+                        )
                     }
 
                     offset = -1
@@ -169,5 +165,24 @@ class GifViewModel @Inject constructor(
 
             isLoading.value = false
         }
+    }
+
+    private fun getCachedGifUrls(context: Context, gifList: List<Gif>): List<Gif> {
+        val cacheDir = Glide.getPhotoCacheDir(context) ?: return emptyList()
+        val diskCache = DiskLruCacheWrapper.create(cacheDir, 100 * 1024 * 1024) // 100MB cache size
+        val cachedGifs = mutableListOf<Gif>()
+
+        gifList.filter { gif ->
+            try {
+                val safeKey = ObjectKey(gif.image)
+                val snapshot = diskCache.get(safeKey)
+                if (snapshot != null) {
+                    cachedGifs.add(gif)
+                } else false
+            }catch (t: Throwable){
+                false
+            }
+        }
+        return cachedGifs
     }
 }
