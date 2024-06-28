@@ -81,6 +81,7 @@ fun GifsListScreen(
                                 navController.navigate("gif_full_screen/${gif.id}")
                             },
                             onItemMenuClick = {
+                                viewModel.shareGif(navController.context, url = gif.image)
                                 Timber.d("Clicked on ${gif.title}")
                             }
                         )

@@ -56,6 +56,10 @@ class MainActivity : ComponentActivity() {
                         }
                         GifFullScreen(viewModel= viewModel, initialIndex = index)
                     }
+//                    composable("shareGif/{gifURL}") { backStackEntry ->
+//                        val gifUrl = backStackEntry.arguments?.getString("gifURL") ?: ""
+//                        viewModel.shareGif(navController.context, gifUrl)
+//                    }
                 }
             }
         }
